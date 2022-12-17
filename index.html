@@ -1,0 +1,81 @@
+<html lang="en">
+<head>
+  <title>ENWWAI</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>ENGLISH WRITING WITH AI</h1>
+    <div id="chatDiv">
+    <ul id="peopleLayout">
+        <li id="selected_people" onclick="selectChat(this)">Walter</li>
+        <li id="people" onclick="selectChat(this)"> Jack</li>
+
+    </ul>
+    <ul id="msgLayout">
+
+    </ul>
+    </div>
+    <div id="writeAndSend">
+    <input style="
+    background-color: whitesmoke;
+    border-radius: 10px;
+    padding-left: 5px;
+    color: black;
+" type="text" name="txtMsg" value="">
+    <button style="color: white;background-color: #754a48;" onclick="sendMessage()">Send</button>
+    </div>
+
+
+</body>
+
+<script>
+
+    // Create WebSocket connection.
+
+    const socket = new WebSocket('ws://localhost:80/ws');
+
+    // Connection opened
+
+
+    
+    
+    socket.addEventListener('open', function (event) {});
+
+    // Listen for messages
+    
+    socket.addEventListener('message', function (event) {
+    var body = document.getElementById("msgLayout")
+    var list = document.createElement("li")
+
+    list.innerHTML = event.data 
+
+    body.appendChild(list)
+    var obj = document.getElementById("msgLayout");
+    obj.scrollTop = obj.scrollHeight;
+
+
+    });
+
+
+    function sendMessage(){
+        var msg = document.getElementsByName('txtMsg')[0].value
+        document.getElementsByName('txtMsg')[0].value=""
+        socket.send(msg)
+
+    }
+
+    function selectChat(elem){  
+
+        var lis = document.getElementById("peopleLayout").getElementsByTagName("li");
+        for (var i = 0; i < lis.length; i++) {
+            lis[i].id = "people";
+        }
+        
+        elem.id = "selected_people";
+    }
+
+
+</script>
+
+
+</html>

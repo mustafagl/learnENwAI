@@ -1,0 +1,106 @@
+#chatDiv{
+  border-radius: 5px;
+  margin:0 auto;
+  width: 80%;
+  height: 70%;
+  border: solid #1e4671 5px;
+
+}
+
+#msgLayout {
+  display: inline;
+  float: right;
+
+  width: 80%;
+  height: 100%;
+background: linear-gradient(203deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 100%);
+    overflow:hidden; overflow-y:scroll;
+    padding: 0px;
+    margin: 0;
+  }
+  
+
+  #msgLayout li{
+    display: block;
+    max-width:50%; 
+    word-break:break-all; 
+    border:1px solid rgb(255, 255, 255);
+    clear: both;
+    padding: 5px;
+    border-radius: 6px;
+    margin-top: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
+
+
+}
+#msgLayout li:nth-child(even){background-color: #55ffbabf;float: right;}
+#msgLayout li:nth-child(odd){background-color: #ffffffa8;float: left;}
+
+
+#writeAndSend{
+  display: grid;
+  width: 40%;
+  margin: 0 auto;
+}
+
+
+#peopleLayout{
+
+
+
+  display: inline;
+  float: left;
+  width: 20%;
+  height: 100%;
+  background:linear-gradient(90deg, #5e9495 0%, #73d1ca66 53%, #b8ed8dd6 97%, #000 100%);
+
+  overflow:hidden; overflow-y:scroll;
+  padding: 0px;
+  margin: 0%;
+
+}
+
+#peopleLayout li{
+  display: block;
+  text-align: center;
+  width: 50%;
+  margin: auto;
+  word-break:break-all; 
+  border:1px solid rgb(255, 255, 255);
+  clear: both;
+  padding: 5px;
+  border-radius: 6px;
+  margin-top: 5px;
+
+
+
+}
+
+#people{
+  background: #ffffff96;
+
+}
+
+#selected_people {
+  background: #002fae83;
+  color: #fff;
+}
+
+
+h1 {
+  height: 10%;
+  margin-right: auto;margin-left: auto;  text-align: center;   
+  font-family: "Avenir Next", sans-serif;
+  text-transform: uppercase;
+  font-style: italic;
+  font-size: 3.8em;
+  letter-spacing: 0.05em;
+  filter: brightness(110%) saturate(140%);                    
+  text-shadow: 2px 2px 5px #07284c;
+
+}
+
+body{
+  background: linear-gradient(331deg, #056e92bd 0%, #54aca4 51%, #b7afcd 100%);
+}
