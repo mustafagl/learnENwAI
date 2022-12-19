@@ -33,12 +33,10 @@
     // Create WebSocket connection.
 
     const socket = new WebSocket('ws://localhost:80/ws');
+    const chatHistory = [];
 
-    // Connection opened
 
 
-    
-    
     socket.addEventListener('open', function (event) {});
 
     // Listen for messages
@@ -47,10 +45,19 @@
     var body = document.getElementById("msgLayout")
     var list = document.createElement("li")
 
-    list.innerHTML = event.data 
+    list.innerHTML = event.data
 
     body.appendChild(list)
+
+
+   
+    chatHistory.push(event.data.replace(/[\r\n]/gm,"\\n"))
+    
+    console.log(chatHistory.join("\\n"))
+
+
     var obj = document.getElementById("msgLayout");
+
     obj.scrollTop = obj.scrollHeight;
 
 
@@ -60,7 +67,23 @@
     function sendMessage(){
         var msg = document.getElementsByName('txtMsg')[0].value
         document.getElementsByName('txtMsg')[0].value=""
-        socket.send(msg)
+        //chatHistory.push(`USER: `+msg +` \\n WALTER: `)
+
+        chatHistory.push(`USER: `+ msg.replace(/[\r\n]/gm,"\\n") +` \\nWALTER: `)
+        console.log("log2"+chatHistory.join("\\n"))
+
+        var body = document.getElementById("msgLayout")
+
+        var list = document.createElement("li")
+
+        list.innerHTML = msg
+
+        body.appendChild(list)
+        var obj = document.getElementById("msgLayout");
+
+        obj.scrollTop = obj.scrollHeight;
+
+        socket.send(chatHistory.join("\\n"))
 
     }
 

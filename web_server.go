@@ -17,8 +17,6 @@ import (
 
 type M map[string]interface{}
 
-var chatHistory []string
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -43,23 +41,15 @@ func reader(conn *websocket.Conn) {
 			return
 		}
 
-		fmt.Println(string(p))
-		fmt.Println(string(messageType))
+		//fmt.Println(string(p))
+		//fmt.Println(string(messageType))
 
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			fmt.Println(err)
-			return
-		}
-		chatHistory = append(chatHistory, "USER: "+string(p)+`\n WALTER:`)
-
-		ai_answer := getTextFromAI()
+		ai_answer := getTextFromAI(string(p))
 
 		if err := conn.WriteMessage(messageType, []byte(ai_answer)); err != nil {
 			fmt.Println(err)
 			return
 		}
-
-		chatHistory = append(chatHistory, strings.ReplaceAll(ai_answer, "\n", ""))
 
 	}
 
@@ -72,25 +62,21 @@ func wsEndPoint(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Client Succesfully Connected")
-	chatHistory = nil
-	chatHistory = append(chatHistory, `USER: Ask me personal question please \n WALTER:`)
+	//fmt.Printf("Client Succesfully Connected")
 
-	first_res := getTextFromAI()
+	first_res := getTextFromAI(`USER: Ask me personal question please \n WALTER:`)
 
 	err = ws.WriteMessage(websocket.TextMessage, []byte(first_res))
 	if err != nil {
 		log.Println(err)
 	}
 
-	chatHistory = append(chatHistory, strings.ReplaceAll(first_res, "\n", ""))
-
 	defer ws.Close()
 	reader(ws)
 
 }
 
-func getTextFromAI() string {
+func getTextFromAI(p string) string {
 	content, err := os.ReadFile("walter.txt")
 	if err != nil {
 		fmt.Println(err)
@@ -99,7 +85,7 @@ func getTextFromAI() string {
 	client := http.Client{}
 	payload := strings.NewReader(`{
 		"model": "text-davinci-003",
-		"prompt": "` + string(content) + `\n` + strings.Join(chatHistory, `\n`) + `",
+		"prompt": "` + string(content) + `\n WALTER: ` + p + `",
 		"temperature": 0.9,
 		"max_tokens": 400,
 		"top_p": 1,
@@ -108,7 +94,7 @@ func getTextFromAI() string {
 		"stop": [" WALTER:", " USER:"]
 	  }`)
 
-	fmt.Println(payload)
+	//fmt.Println(payload)
 
 	req, err := http.NewRequest("POST", "https://api.openai.com/v1/completions", payload)
 	if err != nil {
@@ -116,7 +102,7 @@ func getTextFromAI() string {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+"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")
+	req.Header.Add("Authorization", "Bearer "+"$API_KEY")
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -126,7 +112,7 @@ func getTextFromAI() string {
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 
 	var dat map[string]interface{}
 
