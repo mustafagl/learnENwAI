@@ -7,9 +7,8 @@
     <h1>ENGLISH WRITING WITH AI</h1>
     <div id="chatDiv">
     <ul id="peopleLayout">
-        <li id="selected_people" onclick="selectChat(this)">Walter</li>
+        <li id="selected_people" onclick="selectChat(this)">Walter White</li>
         <li id="people" onclick="selectChat(this)"> Jack</li>
-
     </ul>
     <ul id="msgLayout">
 
@@ -22,8 +21,17 @@
     padding-left: 5px;
     color: black;
 " type="text" name="txtMsg" value="">
-    <button style="color: white;background-color: #754a48;" onclick="sendMessage()">Send</button>
+    <div style="display:inline-block;margin:auto">
+        <button style="display:inline;margin: auto;margin-top:3%;color:white;background-color:red" onclick="getWarning()">show warning</button>
+        <button style="color: white;background-color: #754a48;" onclick="sendMessage()">Send</button>
+        <button style="display:inline;margin: auto;margin-top:3%;color:white;background-color:blue" onclick="getAlternative()">create alternative</button>
+
+    
     </div>
+    <p id="info" style="text-align: center;"></p>
+    </div>
+
+
 
 
 </body>
@@ -42,23 +50,39 @@
     // Listen for messages
     
     socket.addEventListener('message', function (event) {
-    var body = document.getElementById("msgLayout")
-    var list = document.createElement("li")
-
-    list.innerHTML = event.data
-
-    body.appendChild(list)
 
 
-   
-    chatHistory.push(event.data.replace(/[\r\n]/gm,"\\n"))
-    
-    console.log(chatHistory.join("\\n"))
+    if(event.data.split("$$")[0]=="GetText"){
+        var body = document.getElementById("msgLayout")
+        var list = document.createElement("li")
+
+        list.innerHTML = event.data.split("$$")[1]
+
+        body.appendChild(list)
 
 
-    var obj = document.getElementById("msgLayout");
 
-    obj.scrollTop = obj.scrollHeight;
+        chatHistory.push(event.data.split("$$")[1].replace(/[\r\n]/gm,"\\n"))
+
+        console.log(chatHistory.join("\\n"))
+
+
+        var obj = document.getElementById("msgLayout");
+
+        obj.scrollTop = obj.scrollHeight;
+
+    }
+    else if (event.data.split("$$")[0]=="GetWarning"){
+        var p = document.getElementById("info")
+        p.innerHTML=event.data.split("$$")[1]
+
+    }
+    else if (event.data.split("$$")[0]=="GetAlternative"){
+        var p = document.getElementById("info")
+        p.innerHTML=event.data.split("$$")[1]
+
+    }
+
 
 
     });
@@ -83,7 +107,20 @@
 
         obj.scrollTop = obj.scrollHeight;
 
-        socket.send(chatHistory.join("\\n"))
+        socket.send("GetText"+"$$"+chatHistory.join("\\n"))
+
+    }
+
+    function getWarning(){
+        var msg = document.getElementsByName('txtMsg')[0].value
+
+        socket.send("GetWarning"+"$$"+msg)
+
+    }
+    function getAlternative(){
+        var msg = document.getElementsByName('txtMsg')[0].value
+
+        socket.send("GetAlternative"+"$$"+msg)
 
     }
 
@@ -95,6 +132,7 @@
         }
         
         elem.id = "selected_people";
+        
     }
 
 

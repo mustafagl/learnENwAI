@@ -43,12 +43,29 @@ func reader(conn *websocket.Conn) {
 
 		//fmt.Println(string(p))
 		//fmt.Println(string(messageType))
+		split := strings.Split(string(p), "$$")
 
-		ai_answer := getTextFromAI(string(p))
+		if "GetText" == string(split[0]) {
+			ai_answer := "GetText" + "$$" + getTextFromAI(string(split[1]))
 
-		if err := conn.WriteMessage(messageType, []byte(ai_answer)); err != nil {
-			fmt.Println(err)
-			return
+			if err := conn.WriteMessage(messageType, []byte(ai_answer)); err != nil {
+				fmt.Println(err)
+				return
+			}
+		} else if "GetWarning" == string(split[0]) {
+			ai_answer := "GetWarning" + "$$" + getWarningTextFromAI(string(split[1]))
+
+			if err := conn.WriteMessage(messageType, []byte(ai_answer)); err != nil {
+				fmt.Println(err)
+				return
+			}
+		} else if "GetAlternative" == string(split[0]) {
+			ai_answer := "GetAlternative" + "$$" + getAlternativeTextFromAI(string(split[1]))
+
+			if err := conn.WriteMessage(messageType, []byte(ai_answer)); err != nil {
+				fmt.Println(err)
+				return
+			}
 		}
 
 	}
@@ -64,7 +81,7 @@ func wsEndPoint(w http.ResponseWriter, r *http.Request) {
 	}
 	//fmt.Printf("Client Succesfully Connected")
 
-	first_res := getTextFromAI(`USER: Ask me personal question please \n WALTER:`)
+	first_res := "GetText" + "$$" + getTextFromAI(`USER: Ask me personal question please \n WALTER:`)
 
 	err = ws.WriteMessage(websocket.TextMessage, []byte(first_res))
 	if err != nil {
@@ -87,7 +104,7 @@ func getTextFromAI(p string) string {
 		"model": "text-davinci-003",
 		"prompt": "` + string(content) + `\n WALTER: ` + p + `",
 		"temperature": 0.9,
-		"max_tokens": 400,
+		"max_tokens": 1600,
 		"top_p": 1,
 		"frequency_penalty": 0.0,
 		"presence_penalty": 0.6,
@@ -102,7 +119,7 @@ func getTextFromAI(p string) string {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+"$API_KEY")
+	req.Header.Add("Authorization", "Bearer "+"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")
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -113,6 +130,94 @@ func getTextFromAI(p string) string {
 	body, err := io.ReadAll(res.Body)
 
 	//fmt.Println(string(body))
+
+	var dat map[string]interface{}
+
+	if err := json.Unmarshal(body, &dat); err != nil {
+		panic(err)
+	}
+
+	response_text := dat["choices"].([]interface{})[0].(map[string]interface{})["text"].(string)
+
+	return response_text
+}
+
+func getWarningTextFromAI(p string) string {
+
+	client := http.Client{}
+	payload := strings.NewReader(`{
+		"model": "text-davinci-003",
+		"prompt": "` + `Correct this to standard English and print the total number of errors (with explanation):\n` + p + `\n",
+		"temperature": 0,
+		"max_tokens": 60,
+		"top_p": 1.0,
+		"frequency_penalty": 0.0,
+		"presence_penalty": 0.0
+	  }`)
+
+	fmt.Println(payload)
+
+	req, err := http.NewRequest("POST", "https://api.openai.com/v1/completions", payload)
+	if err != nil {
+		//Handle Error
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+"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")
+
+	res, err := client.Do(req)
+	if err != nil {
+		//Handle Error
+		panic(err)
+	}
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+
+	fmt.Println(string(body))
+
+	var dat map[string]interface{}
+
+	if err := json.Unmarshal(body, &dat); err != nil {
+		panic(err)
+	}
+
+	response_text := dat["choices"].([]interface{})[0].(map[string]interface{})["text"].(string)
+
+	return response_text
+}
+
+func getAlternativeTextFromAI(p string) string {
+
+	client := http.Client{}
+	payload := strings.NewReader(`{
+		"model": "text-davinci-003",
+		"prompt": "` + `Create Alternative :\n\n` + p + `.",
+		"temperature": 0,
+		"max_tokens": 60,
+		"top_p": 1.0,
+		"frequency_penalty": 0.0,
+		"presence_penalty": 0.0
+	  }`)
+
+	fmt.Println(payload)
+
+	req, err := http.NewRequest("POST", "https://api.openai.com/v1/completions", payload)
+	if err != nil {
+		//Handle Error
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+"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")
+
+	res, err := client.Do(req)
+	if err != nil {
+		//Handle Error
+		panic(err)
+	}
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+
+	fmt.Println(string(body))
 
 	var dat map[string]interface{}
 
